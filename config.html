@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>导航站配置工具</title>
+  <style>
+    /* 可改参数：主题颜色配置 */
+    :root {
+      --bg-color: #1a1a1a;
+      --card-bg: #2d2d2d;
+      --input-bg: #3a3a3a;
+      --text-primary: #e5e5e5;
+      --text-secondary: #a0a0a0;
+      --border-color: #444;
+      --primary-color: #3b82f6;
+      --primary-hover: #2563eb;
+      --danger-color: #ef4444;
+      --danger-hover: #dc2626;
+      --success-color: #10b981;
+      --warning-color: #f59e0b;
+      --shadow: rgba(0, 0, 0, 0.3);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-primary);
+      line-height: 1.6;
+      padding: 20px;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    header {
+      background-color: var(--card-bg);
+      padding: 24px;
+      border-radius: 12px;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 12px var(--shadow);
+    }
+
+    h1 {
+      font-size: 1.875rem;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    #file-status {
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+      flex: 1;
+    }
+
+    #file-status.active {
+      color: var(--success-color);
+      font-weight: 500;
+    }
+
+    /* 可改参数：按钮样式和尺寸 */
+    button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-weight: 500;
+    }
+
+    .btn-primary {
+      background-color: var(--primary-color);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+    .btn-danger {
+      background-color: transparent;
+      color: var(--danger-color);
+      font-size: 1.5rem;
+      padding: 4px 12px;
+      min-width: 36px;
+      transition: all 0.2s;
+    }
+
+    .btn-danger:hover {
+      background-color: var(--danger-color);
+      color: white;
+      transform: scale(1.1);
+    }
+
+    /* 可改参数：自动获取按钮和输入框组合样式 */
+    .input-with-button {
+      display: flex;
+      gap: 8px;
+    }
+
+    .input-with-button input {
+      flex: 1;
+    }
+
+    .btn-secondary {
+      background-color: var(--input-bg);
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
+      padding: 12px 16px;
+      white-space: nowrap;
+      min-width: 120px;
+    }
+
+    .btn-secondary:hover {
+      background-color: #444;
+      border-color: var(--primary-color);
+    }
+
+    .btn-secondary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-secondary.loading {
+      position: relative;
+      color: transparent;
+    }
+
+    .btn-secondary.loading::after {
+      content: '';
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--primary-color);
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+
+    /* 可改参数：自动获取预览区域样式 */
+    .fetch-preview {
+      margin-top: 16px;
+      padding: 16px;
+      background-color: var(--input-bg);
+      border-radius: 8px;
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      border: 1px solid var(--border-color);
+    }
+
+    .preview-icon {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .preview-icon img {
+      width: 48px;
+      height: 48px;
+      border-radius: 8px;
+      object-fit: cover;
+    }
+
+    .preview-color-box {
+      width: 48px;
+      height: 48px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+    }
+
+    .preview-info {
+      flex: 1;
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+    }
+
+    .warning {
+      background-color: rgba(245, 158, 11, 0.1);
+      border-left: 4px solid var(--warning-color);
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 24px;
+      display: none;
+    }
+
+    .info-box {
+      background-color: rgba(59, 130, 246, 0.1);
+      border-left: 4px solid var(--primary-color);
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 24px;
+      font-size: 0.875rem;
+      line-height: 1.8;
+    }
+
+    .info-box h3 {
+      font-size: 1rem;
+      margin-bottom: 8px;
+      color: var(--primary-color);
+    }
+
+    .info-box ol {
+      margin-left: 20px;
+    }
+
+    section {
+      background-color: var(--card-bg);
+      padding: 24px;
+      border-radius: 12px;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 12px var(--shadow);
+    }
+
+    section h2 {
+      font-size: 1.25rem;
+      margin-bottom: 20px;
+      color: var(--text-primary);
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      background-color: var(--input-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      color: var(--text-primary);
+      font-size: 1rem;
+      transition: border-color 0.3s;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+    }
+
+    input::placeholder {
+      color: var(--text-secondary);
+    }
+
+    #add-btn {
+      width: 100%;
+      padding: 14px;
+      font-size: 1.125rem;
+    }
+
+    /* 可改参数：卡片列表项样式 */
+    #cards {
+      list-style: none;
+    }
+
+    .card-item {
+      background-color: var(--input-bg);
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      transition: all 0.3s;
+      border: 1px solid transparent;
+    }
+
+    .card-item:hover {
+      background-color: #444;
+      border-color: var(--primary-color);
+      transform: translateX(4px);
+    }
+
+    .card-info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .card-info strong {
+      font-size: 1.125rem;
+      color: var(--text-primary);
+    }
+
+    .card-info .url {
+      font-size: 0.875rem;
+      color: var(--primary-color);
+      word-break: break-all;
+    }
+
+    .card-info .desc {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+    }
+
+    .empty {
+      text-align: center;
+      color: var(--text-secondary);
+      padding: 40px;
+      font-style: italic;
+    }
+
+    /* 消息提示样式 */
+    .message {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 16px 24px;
+      border-radius: 8px;
+      color: white;
+      font-weight: 500;
+      box-shadow: 0 4px 12px var(--shadow);
+      animation: slideIn 0.3s ease-out;
+      z-index: 1000;
+    }
+
+    .message.success {
+      background-color: var(--success-color);
+    }
+
+    .message.error {
+      background-color: var(--danger-color);
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    /* 响应式设计 */
+    @media (max-width: 768px) {
+      body {
+        padding: 12px;
+      }
+
+      header, section {
+        padding: 16px;
+      }
+
+      h1 {
+        font-size: 1.5rem;
+      }
+
+      .header-actions {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .card-item {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .btn-danger {
+        align-self: flex-end;
+      }
+
+      .message {
+        left: 20px;
+        right: 20px;
+      }
+
+      .input-with-button {
+        flex-direction: column;
+      }
+
+      .btn-secondary {
+        width: 100%;
+      }
+
+      .fetch-preview {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🛠️ 导航站配置工具</h1>
+      <div class="header-actions">
+        <button id="select-file" class="btn-primary">📁 选择 index.html</button>
+        <span id="file-status">未选择文件</span>
+      </div>
+    </header>
+
+    <div id="browser-warning" class="warning">
+      ⚠️ 您的浏览器不支持文件系统访问功能。请使用 Chrome 86+、Edge 86+ 或其他基于 Chromium 的浏览器。
+    </div>
+
+    <div class="info-box">
+      <h3>📖 使用说明</h3>
+      <ol>
+        <li>必须使用 Chrome 86+、Edge 86+ 或基于 Chromium 的浏览器</li>
+        <li>点击"选择 index.html"并授权文件访问</li>
+        <li>每次添加/删除会立即保存到硬盘</li>
+        <li>建议先备份 index.html 文件</li>
+      </ol>
+    </div>
+
+    <section id="add-form">
+      <h2>➕ 添加新卡片</h2>
+      <div class="form-group">
+        <label for="name">网站名称 *</label>
+        <input type="text" id="name" placeholder="例如：Google" required>
+      </div>
+      <div class="form-group">
+        <label for="url">网址 *</label>
+        <div class="input-with-button">
+          <input type="text" id="url" placeholder="例如：https://www.google.com" required>
+          <button type="button" id="auto-fetch-btn" class="btn-secondary">🔍 自动获取</button>
+        </div>
+      </div>
+      <div id="fetch-preview" class="fetch-preview" style="display: none;">
+        <div class="preview-icon">
+          <img id="preview-icon-img" src="" alt="图标预览">
+          <div id="preview-color" class="preview-color-box"></div>
+        </div>
+        <div class="preview-info">
+          <span id="preview-theme-color">主题色：未获取</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="description">描述</label>
+        <input type="text" id="description" placeholder="例如：全球最大的搜索引擎">
+      </div>
+      <button id="add-btn" class="btn-primary">✨ 添加卡片</button>
+    </section>
+
+    <section id="card-list-section">
+      <h2>📋 已有卡片</h2>
+      <ul id="cards">
+        <li class="empty">请先选择 index.html 文件</li>
+      </ul>
+    </section>
+  </div>
+
+  <script>
+    // 全局变量：可改参数（文件句柄和配置数据）
+    let fileHandle = null;           // 文件句柄
+    let configArray = [];            // 配置数组
+    let originalContent = '';        // 原始文件内容
+    let fetchedIconUrl = '';         // 自动获取的图标 URL
+    let fetchedThemeColor = '';      // 自动获取的主题色
+
+    // 检查浏览器支持
+    function checkBrowserSupport() {
+      const warning = document.getElementById('browser-warning');
+      if (!('showOpenFilePicker' in window)) {
+        warning.style.display = 'block';
+        document.getElementById('select-file').disabled = true;
+      }
+    }
+
+    // 生成唯一 ID
+    function generateId() {
+      return `site_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    }
+
+    // 提取域名并生成 favicon URL
+    function extractDomain(url) {
+      // 确保 URL 包含协议
+      if (!/^https?:\/\//i.test(url)) {
+        url = 'https://' + url;
+      }
+      try {
+        const urlObj = new URL(url);
+        return urlObj.origin;
+      } catch (e) {
+        return url;
+      }
+    }
+
+    // URL 格式验证
+    function isValidUrl(string) {
+      // 补全协议
+      if (!/^https?:\/\//i.test(string)) {
+        string = 'https://' + string;
+      }
+      try {
+        new URL(string);
+        return true;
+      } catch (_) {
+        return false;
+      }
+    }
+
+    // 可改参数：通过 CORS 代理抓取页面内容
+    async function fetchPageContent(url) {
+      // 确保 URL 格式正确
+      if (!/^https?:\/\//i.test(url)) {
+        url = 'https://' + url;
+      }
+
+      // 使用 CORS 代理
+      const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(url)}`;
+
+      try {
+        const response = await fetch(proxyUrl, {
+          method: 'GET',
+          headers: {
+            'Accept': 'text/html'
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+
+        const html = await response.text();
+        return html;
+      } catch (error) {
+        throw new Error('无法访问目标网站');
+      }
+    }
+
+    // 从 HTML 内容中提取页面信息
+    function extractPageInfo(html, baseUrl) {
+      // 创建临时 DOM 解析器
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+
+      // 提取标题
+      let title = doc.querySelector('title')?.textContent?.trim() || '';
+      // 清理标题（移除多余空白）
+      title = title.replace(/\s+/g, ' ');
+
+      // 提取图标
+      let iconUrl = '';
+
+      // 优先级1: link rel="icon"
+      const iconLink = doc.querySelector('link[rel*="icon"]');
+      if (iconLink) {
+        iconUrl = iconLink.getAttribute('href');
+      }
+
+      // 优先级2: link rel="shortcut icon"
+      if (!iconUrl) {
+        const shortcutIcon = doc.querySelector('link[rel="shortcut icon"]');
+        if (shortcutIcon) {
+          iconUrl = shortcutIcon.getAttribute('href');
+        }
+      }
+
+      // 处理相对路径
+      if (iconUrl) {
+        try {
+          iconUrl = new URL(iconUrl, baseUrl).href;
+        } catch (e) {
+          iconUrl = '';
+        }
+      }
+
+      // 降级方案：使用默认 favicon 路径
+      if (!iconUrl) {
+        try {
+          const urlObj = new URL(baseUrl);
+          iconUrl = `${urlObj.origin}/favicon.ico`;
+        } catch (e) {
+          iconUrl = '';
+        }
+      }
+
+      return {
+        title,
+        iconUrl
+      };
+    }
+
+    // 从图标提取主题色
+    async function extractThemeColor(imageUrl) {
+      return new Promise((resolve, reject) => {
+        // 通过代理加载图标（避免跨域）
+        const proxyImageUrl = `https://corsproxy.io/?${encodeURIComponent(imageUrl)}`;
+
+        const img = new Image();
+        img.crossOrigin = 'Anonymous';
+
+        img.onload = function() {
+          try {
+            // 创建 Canvas
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+
+            canvas.width = img.width;
+            canvas.height = img.height;
+
+            // 绘制图像
+            ctx.drawImage(img, 0, 0);
+
+            // 获取图像数据
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const pixels = imageData.data;
+
+            // 计算平均颜色（忽略透明像素）
+            let r = 0, g = 0, b = 0, count = 0;
+
+            for (let i = 0; i < pixels.length; i += 4) {
+              const alpha = pixels[i + 3];
+
+              // 只计算不透明的像素
+              if (alpha > 128) {
+                r += pixels[i];
+                g += pixels[i + 1];
+                b += pixels[i + 2];
+                count++;
+              }
+            }
+
+            if (count === 0) {
+              resolve('#3b82f6'); // 默认蓝色
+              return;
+            }
+
+            r = Math.round(r / count);
+            g = Math.round(g / count);
+            b = Math.round(b / count);
+
+            // 转换为十六进制
+            const hex = `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
+
+            resolve(hex);
+          } catch (error) {
+            reject(error);
+          }
+        };
+
+        img.onerror = function() {
+          reject(new Error('图标加载失败'));
+        };
+
+        img.src = proxyImageUrl;
+      });
+    }
+
+    // 显示预览
+    function showFetchPreview(iconUrl, themeColor) {
+      const preview = document.getElementById('fetch-preview');
+      const iconImg = document.getElementById('preview-icon-img');
+      const colorBox = document.getElementById('preview-color');
+      const colorText = document.getElementById('preview-theme-color');
+
+      // 设置图标
+      if (iconUrl) {
+        iconImg.src = iconUrl;
+        iconImg.style.display = 'block';
+      } else {
+        iconImg.style.display = 'none';
+      }
+
+      // 设置主题色
+      colorBox.style.backgroundColor = themeColor;
+      colorText.textContent = `主题色: ${themeColor}`;
+
+      // 显示预览
+      preview.style.display = 'flex';
+    }
+
+    // 自动获取网站信息
+    async function autoFetch() {
+      // 获取输入的 URL
+      const urlInput = document.getElementById('url');
+      const url = urlInput.value.trim();
+
+      // 验证 URL
+      if (!url) {
+        showMessage('请先输入网址', 'error');
+        return;
+      }
+
+      if (!isValidUrl(url)) {
+        showMessage('请输入有效的网址', 'error');
+        return;
+      }
+
+      // 显示加载状态
+      const btn = document.getElementById('auto-fetch-btn');
+      const originalText = btn.textContent;
+      btn.disabled = true;
+      btn.classList.add('loading');
+      btn.textContent = '获取中...';
+
+      // 隐藏预览
+      document.getElementById('fetch-preview').style.display = 'none';
+
+      try {
+        // 规范化 URL
+        const fullUrl = url.startsWith('http') ? url : 'https://' + url;
+
+        // 步骤1: 抓取页面内容
+        const html = await fetchPageContent(fullUrl);
+
+        // 步骤2: 解析页面信息
+        const pageInfo = extractPageInfo(html, fullUrl);
+
+        if (!pageInfo.title) {
+          throw new Error('未找到页面标题');
+        }
+
+        // 步骤3: 填充表单 - 标题
+        document.getElementById('name').value = pageInfo.title;
+
+        // 步骤4: 保存图标 URL
+        fetchedIconUrl = pageInfo.iconUrl;
+
+        // 步骤5: 提取主题色（异步，不阻塞）
+        let themeColor = '#3b82f6'; // 默认颜色
+        try {
+          if (pageInfo.iconUrl) {
+            themeColor = await extractThemeColor(pageInfo.iconUrl);
+          }
+        } catch (colorError) {
+          console.warn('主题色提取失败:', colorError);
+          // 使用默认颜色
+        }
+
+        fetchedThemeColor = themeColor;
+
+        // 步骤6: 显示预览
+        showFetchPreview(pageInfo.iconUrl, themeColor);
+
+        // 成功提示
+        showMessage('自动获取成功！', 'success');
+
+      } catch (error) {
+        console.error('自动获取失败:', error);
+        showMessage('无法获取，请检查网址或手动填写', 'error');
+
+        // 清空可能的部分填充
+        fetchedIconUrl = '';
+        fetchedThemeColor = '';
+      } finally {
+        // 恢复按钮状态
+        btn.disabled = false;
+        btn.classList.remove('loading');
+        btn.textContent = originalText;
+      }
+    }
+
+    // 读取文件内容
+    async function readFileContent(fileHandle) {
+      const file = await fileHandle.getFile();
+      const content = await file.text();
+      return content;
+    }
+
+    // 可改参数：解析配置数组的正则表达式
+    function parseConfig(htmlContent) {
+      try {
+        // 使用正则表达式提取 SITE_CONFIG 数组
+        const match = htmlContent.match(/const SITE_CONFIG = (\[[\s\S]*?\]);/);
+        if (!match) {
+          throw new Error('未找到 SITE_CONFIG 配置');
+        }
+        // 解析 JSON 数组
+        const configString = match[1];
+        const config = eval(`(${configString})`); // 使用 eval 解析包含注释的 JS 数组
+        return config;
+      } catch (e) {
+        console.error('解析配置失败:', e);
+        throw new Error('解析配置失败，请检查 index.html 文件格式');
+      }
+    }
+
+    // 更新配置到 HTML 内容
+    function updateConfig(htmlContent, newConfigArray) {
+      // 将配置数组转换为格式化的 JSON 字符串
+      const configString = JSON.stringify(newConfigArray, null, 6);
+      // 替换原有的 SITE_CONFIG 数组
+      const newContent = htmlContent.replace(
+        /const SITE_CONFIG = \[[\s\S]*?\];/,
+        `const SITE_CONFIG = ${configString};`
+      );
+      return newContent;
+    }
+
+    // 写入文件内容
+    async function writeFileContent(fileHandle, content) {
+      try {
+        const writable = await fileHandle.createWritable();
+        await writable.write(content);
+        await writable.close();
+      } catch (e) {
+        throw new Error('写入文件失败：' + e.message);
+      }
+    }
+
+    // 选择文件
+    async function selectFile() {
+      try {
+        // 打开文件选择器
+        const [handle] = await window.showOpenFilePicker({
+          types: [{
+            description: 'HTML Files',
+            accept: { 'text/html': ['.html'] }
+          }],
+          multiple: false
+        });
+
+        fileHandle = handle;
+
+        // 读取文件内容
+        originalContent = await readFileContent(fileHandle);
+
+        // 解析配置
+        configArray = parseConfig(originalContent);
+
+        // 更新界面状态
+        const fileName = fileHandle.name;
+        const statusElement = document.getElementById('file-status');
+        statusElement.textContent = `✅ 已选择：${fileName}（${configArray.length} 个卡片）`;
+        statusElement.classList.add('active');
+
+        // 渲染卡片列表
+        renderCardList();
+
+        showMessage('文件加载成功！', 'success');
+      } catch (error) {
+        if (error.name !== 'AbortError') {
+          console.error('选择文件失败:', error);
+          showMessage('文件加载失败：' + error.message, 'error');
+        }
+      }
+    }
+
+    // 渲染卡片列表
+    function renderCardList() {
+      const container = document.getElementById('cards');
+      container.innerHTML = '';
+
+      if (configArray.length === 0) {
+        container.innerHTML = '<li class="empty">暂无卡片，点击上方添加第一个吧！</li>';
+        return;
+      }
+
+      configArray.forEach(card => {
+        const li = document.createElement('li');
+        li.className = 'card-item';
+        li.innerHTML = `
+          <div class="card-info">
+            <strong>${card.name}</strong>
+            <span class="url">${card.url}</span>
+            <span class="desc">${card.description}</span>
+          </div>
+          <button class="btn-danger" onclick="deleteCard('${card.id}')" title="删除">×</button>
+        `;
+        container.appendChild(li);
+      });
+    }
+
+    // 保存配置到文件
+    async function saveConfig() {
+      try {
+        // 读取当前文件内容（可能被外部修改）
+        const currentContent = await readFileContent(fileHandle);
+
+        // 更新配置
+        const newContent = updateConfig(currentContent, configArray);
+
+        // 写回文件
+        await writeFileContent(fileHandle, newContent);
+
+        return true;
+      } catch (error) {
+        console.error('保存失败:', error);
+        showMessage('保存失败：' + error.message, 'error');
+        return false;
+      }
+    }
+
+    // 添加卡片
+    async function addCard() {
+      // 验证 fileHandle 是否已选择
+      if (!fileHandle) {
+        showMessage('请先选择 index.html 文件', 'error');
+        return;
+      }
+
+      // 获取表单输入值
+      const name = document.getElementById('name').value.trim();
+      const url = document.getElementById('url').value.trim();
+      const description = document.getElementById('description').value.trim();
+
+      // 验证必填字段
+      if (!name || !url) {
+        showMessage('名称和网址不能为空', 'error');
+        return;
+      }
+
+      // 验证 URL 格式
+      if (!isValidUrl(url)) {
+        showMessage('请输入有效的网址', 'error');
+        return;
+      }
+
+      // 创建新卡片对象
+      const fullUrl = url.startsWith('http') ? url : 'https://' + url;
+      
+      // 优先使用自动获取的图标，否则使用默认方案
+      let iconUrl = fetchedIconUrl;
+      if (!iconUrl) {
+        const domain = extractDomain(fullUrl);
+        iconUrl = `${domain}/favicon.ico`;
+      }
+      
+      const newCard = {
+        id: generateId(),
+        name: name,
+        url: fullUrl,
+        icon: iconUrl,
+        description: description || '暂无描述'
+      };
+
+      // 添加到配置数组
+      configArray.push(newCard);
+
+      // 保存文件
+      const success = await saveConfig();
+      
+      if (success) {
+        // 清空表单
+        document.getElementById('name').value = '';
+        document.getElementById('url').value = '';
+        document.getElementById('description').value = '';
+
+        // 清空自动获取的数据
+        fetchedIconUrl = '';
+        fetchedThemeColor = '';
+        document.getElementById('fetch-preview').style.display = 'none';
+
+        // 刷新列表
+        renderCardList();
+
+        // 更新状态
+        const statusElement = document.getElementById('file-status');
+        statusElement.textContent = `✅ 已选择：${fileHandle.name}（${configArray.length} 个卡片）`;
+
+        // 成功提示
+        showMessage('添加成功！', 'success');
+      }
+    }
+
+    // 删除卡片
+    async function deleteCard(id) {
+      // 确认删除
+      if (!confirm('确定要删除这个卡片吗？此操作不可撤销！')) {
+        return;
+      }
+
+      // 从配置数组中移除
+      configArray = configArray.filter(card => card.id !== id);
+
+      // 保存文件
+      const success = await saveConfig();
+      
+      if (success) {
+        // 刷新列表
+        renderCardList();
+
+        // 更新状态
+        const statusElement = document.getElementById('file-status');
+        statusElement.textContent = `✅ 已选择：${fileHandle.name}（${configArray.length} 个卡片）`;
+
+        // 成功提示
+        showMessage('删除成功！', 'success');
+      }
+    }
+
+    // 显示消息提示
+    function showMessage(text, type = 'info') {
+      // 创建临时提示元素
+      const msg = document.createElement('div');
+      msg.className = `message ${type}`;
+      msg.textContent = text;
+      document.body.appendChild(msg);
+
+      // 3秒后自动消失
+      setTimeout(() => {
+        msg.style.opacity = '0';
+        setTimeout(() => msg.remove(), 300);
+      }, 3000);
+    }
+
+    // 初始化
+    function init() {
+      // 检查浏览器支持
+      checkBrowserSupport();
+
+      // 绑定事件
+      document.getElementById('select-file').addEventListener('click', selectFile);
+      document.getElementById('add-btn').addEventListener('click', addCard);
+      document.getElementById('auto-fetch-btn').addEventListener('click', autoFetch);
+
+      // 网址输入框变化时清空预览
+      document.getElementById('url').addEventListener('input', () => {
+        fetchedIconUrl = '';
+        fetchedThemeColor = '';
+        document.getElementById('fetch-preview').style.display = 'none';
+      });
+
+      // 表单回车提交
+      const inputs = ['name', 'url', 'description'];
+      inputs.forEach(id => {
+        document.getElementById(id).addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') {
+            addCard();
+          }
+        });
+      });
+    }
+
+    // DOM 加载完成后初始化
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+  </script>
+</body>
+</html>
+

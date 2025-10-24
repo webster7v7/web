@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>个人导航站</title>
+  
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="/manifest.json">
+  
+  <!-- 主题色（会被 JS 动态更新以跟随暗色/亮色模式） -->
+  <meta name="theme-color" content="#1a1a1a" id="theme-color-meta">
+  
+  <!-- Apple Touch Icon -->
+  <link rel="apple-touch-icon" href="/icons/icon-192.png">
+  
+  <!-- iOS PWA 支持 -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="导航站">
+  
+  <!-- Windows Tile -->
+  <meta name="msapplication-TileColor" content="#1a1a1a">
+  <meta name="msapplication-TileImage" content="/icons/icon-192.png">
+  
+  <style>
+    /* 可改参数：主题颜色配置 */
+    :root {
+      --bg-color: #f5f5f5;
+      --card-bg: #ffffff;
+      --text-primary: #333333;
+      --text-secondary: #666666;
+      --shadow-color: rgba(0, 0, 0, 0.1);
+      --shadow-hover: rgba(0, 0, 0, 0.2);
+      --pulse-color: rgba(59, 130, 246, 0.5);
+      --transition-speed: 0.3s;
+    }
+
+    :root.dark {
+      --bg-color: #1a1a1a;
+      --card-bg: #2d2d2d;
+      --text-primary: #e5e5e5;
+      --text-secondary: #a0a0a0;
+      --shadow-color: rgba(0, 0, 0, 0.3);
+      --shadow-hover: rgba(0, 0, 0, 0.5);
+      --pulse-color: rgba(96, 165, 250, 0.6);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-primary);
+      transition: background-color var(--transition-speed), color var(--transition-speed);
+      padding: 20px;
+      min-height: 100vh;
+    }
+
+    header {
+      max-width: 1200px;
+      margin: 0 auto 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 600;
+    }
+
+    #theme-toggle {
+      background-color: var(--card-bg);
+      color: var(--text-primary);
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background-color var(--transition-speed), color var(--transition-speed), transform 0.2s;
+      box-shadow: 0 2px 8px var(--shadow-color);
+    }
+
+    #theme-toggle:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px var(--shadow-hover);
+    }
+
+    #theme-toggle:active {
+      transform: translateY(0);
+    }
+
+    /* 可改参数：桌面端显示列数（grid-template-columns） */
+    #card-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+    }
+
+    /* 响应式断点 */
+    @media (max-width: 1024px) {
+      #card-container {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    @media (max-width: 768px) {
+      #card-container {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+      }
+      
+      h1 {
+        font-size: 1.5rem;
+      }
+    }
+
+    /* 可改参数：卡片最小高度 */
+    .card {
+      background-color: var(--card-bg);
+      border-radius: 16px;
+      padding: 24px;
+      min-height: 180px;
+      cursor: pointer;
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), 
+                  box-shadow 0.3s,
+                  background-color var(--transition-speed);
+      box-shadow: 0 2px 8px var(--shadow-color);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      position: relative;
+      user-select: none;
+    }
+
+    /* 可改参数：悬停阴影扩散程度和缩放比例 */
+    .card:hover {
+      transform: scale(1.05);
+      box-shadow: 0 8px 24px var(--shadow-hover);
+    }
+
+    .card.dragging {
+      opacity: 0.5;
+      cursor: grabbing;
+    }
+
+    .card.drag-over {
+      border: 2px dashed var(--pulse-color);
+      transform: scale(1.02);
+    }
+
+    .icon-wrapper {
+      position: relative;
+      width: 64px;
+      height: 64px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .icon-wrapper img {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .pulse-ring {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: radial-gradient(circle, var(--pulse-color) 0%, transparent 70%);
+      animation: pulse 2s ease-in-out infinite;
+      z-index: 1;
+    }
+
+    /* 可改参数：脉冲周期 2s，可调整为其他值 */
+    @keyframes pulse {
+      0%, 100% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.6;
+      }
+      50% {
+        transform: translate(-50%, -50%) scale(1.8);
+        opacity: 0;
+      }
+    }
+
+    .card h3 {
+      font-size: 1.125rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: var(--text-primary);
+      transition: color var(--transition-speed);
+    }
+
+    .card p {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      transition: color var(--transition-speed);
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>✨ 我的导航站</h1>
+    <button id="theme-toggle">🌙 切换主题</button>
+  </header>
+
+  <main id="card-container"></main>
+
+  <script>
+    // 可改参数：在此添加/删除/修改网址卡片
+    const SITE_CONFIG = [
+      {
+        id: 'google',
+        name: 'Google',
+        url: 'https://www.google.com',
+        icon: 'https://www.google.com/favicon.ico',
+        description: '全球最大的搜索引擎'
+      },
+      {
+        id: 'github',
+        name: 'GitHub',
+        url: 'https://github.com',
+        icon: 'https://github.com/favicon.ico',
+        description: '代码托管与协作平台'
+      },
+      {
+        id: 'stackoverflow',
+        name: 'Stack Overflow',
+        url: 'https://stackoverflow.com',
+        icon: 'https://stackoverflow.com/favicon.ico',
+        description: '程序员问答社区'
+      }
+    ];
+
+    // 本地存储键名
+    const STORAGE_KEYS = {
+      ORDER: 'nav-sites-order',
+      THEME: 'nav-theme-mode'
+    };
+
+    // 拖拽状态
+    let draggedElement = null;
+    let draggedId = null;
+
+    // 获取默认图标（SVG data URI）
+    function getDefaultIcon() {
+      return 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23999"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/></svg>';
+    }
+
+    // 加载主题
+    function loadTheme() {
+      const savedTheme = localStorage.getItem(STORAGE_KEYS.THEME) || 'dark';
+      if (savedTheme === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+      updateThemeButton();
+      updateThemeColor(savedTheme === 'dark');
+    }
+
+    // 保存主题
+    function saveTheme(mode) {
+      localStorage.setItem(STORAGE_KEYS.THEME, mode);
+    }
+
+    // 切换主题
+    function toggleTheme() {
+      const isDark = document.documentElement.classList.toggle('dark');
+      const mode = isDark ? 'dark' : 'light';
+      saveTheme(mode);
+      updateThemeButton();
+      updateThemeColor(isDark);
+    }
+
+    // 更新主题按钮文字
+    function updateThemeButton() {
+      const button = document.getElementById('theme-toggle');
+      const isDark = document.documentElement.classList.contains('dark');
+      button.textContent = isDark ? '☀️ 切换主题' : '🌙 切换主题';
+    }
+
+    // 更新主题色（PWA 地址栏颜色跟随）
+    function updateThemeColor(isDark) {
+      const metaThemeColor = document.getElementById('theme-color-meta');
+      const color = isDark ? '#1a1a1a' : '#f5f5f5';
+      if (metaThemeColor) {
+        metaThemeColor.setAttribute('content', color);
+      }
+    }
+
+    // 加载排序
+    function loadOrder() {
+      const savedOrder = localStorage.getItem(STORAGE_KEYS.ORDER);
+      if (!savedOrder) return [...SITE_CONFIG];
+
+      try {
+        const orderIds = JSON.parse(savedOrder);
+        const orderedSites = [];
+        const siteMap = new Map(SITE_CONFIG.map(site => [site.id, site]));
+
+        // 按保存的顺序重建数组
+        orderIds.forEach(id => {
+          if (siteMap.has(id)) {
+            orderedSites.push(siteMap.get(id));
+            siteMap.delete(id);
+          }
+        });
+
+        // 添加新增的网站（不在保存顺序中的）
+        siteMap.forEach(site => orderedSites.push(site));
+
+        return orderedSites;
+      } catch (e) {
+        console.error('加载排序失败:', e);
+        return [...SITE_CONFIG];
+      }
+    }
+
+    // 保存排序
+    function saveOrder() {
+      const cards = document.querySelectorAll('.card');
+      const order = Array.from(cards).map(card => card.dataset.id);
+      localStorage.setItem(STORAGE_KEYS.ORDER, JSON.stringify(order));
+    }
+
+    // 创建单个卡片
+    function createCard(site) {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.draggable = true;
+      card.dataset.id = site.id;
+
+      card.innerHTML = `
+        <div class="icon-wrapper">
+          <img src="${site.icon}" alt="${site.name}" loading="lazy">
+          <div class="pulse-ring"></div>
+        </div>
+        <h3>${site.name}</h3>
+        <p>${site.description}</p>
+      `;
+
+      // 图标加载失败处理
+      const img = card.querySelector('img');
+      img.onerror = function() {
+        this.src = getDefaultIcon();
+      };
+
+      // 点击打开网址
+      card.addEventListener('click', (e) => {
+        if (!card.classList.contains('dragging')) {
+          window.open(site.url, '_blank');
+        }
+      });
+
+      // 绑定拖拽事件
+      card.addEventListener('dragstart', handleDragStart);
+      card.addEventListener('dragover', handleDragOver);
+      card.addEventListener('dragenter', handleDragEnter);
+      card.addEventListener('dragleave', handleDragLeave);
+      card.addEventListener('drop', handleDrop);
+      card.addEventListener('dragend', handleDragEnd);
+
+      return card;
+    }
+
+    // 渲染所有卡片
+    function renderCards() {
+      const container = document.getElementById('card-container');
+      container.innerHTML = '';
+      
+      const orderedSites = loadOrder();
+      orderedSites.forEach(site => {
+        const card = createCard(site);
+        container.appendChild(card);
+      });
+    }
+
+    // 拖拽开始
+    function handleDragStart(e) {
+      draggedElement = this;
+      draggedId = this.dataset.id;
+      this.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/html', this.innerHTML);
+    }
+
+    // 拖拽经过
+    function handleDragOver(e) {
+      if (e.preventDefault) {
+        e.preventDefault();
+      }
+      e.dataTransfer.dropEffect = 'move';
+      return false;
+    }
+
+    // 拖拽进入
+    function handleDragEnter(e) {
+      if (this !== draggedElement) {
+        this.classList.add('drag-over');
+      }
+    }
+
+    // 拖拽离开
+    function handleDragLeave(e) {
+      this.classList.remove('drag-over');
+    }
+
+    // 放下
+    function handleDrop(e) {
+      if (e.stopPropagation) {
+        e.stopPropagation();
+      }
+
+      if (draggedElement !== this) {
+        // 获取所有卡片
+        const allCards = Array.from(document.querySelectorAll('.card'));
+        const draggedIndex = allCards.indexOf(draggedElement);
+        const targetIndex = allCards.indexOf(this);
+
+        // 交换位置
+        if (draggedIndex < targetIndex) {
+          this.parentNode.insertBefore(draggedElement, this.nextSibling);
+        } else {
+          this.parentNode.insertBefore(draggedElement, this);
+        }
+
+        // 保存新顺序
+        saveOrder();
+      }
+
+      this.classList.remove('drag-over');
+      return false;
+    }
+
+    // 拖拽结束
+    function handleDragEnd(e) {
+      this.classList.remove('dragging');
+      
+      // 清理所有拖拽样式
+      document.querySelectorAll('.card').forEach(card => {
+        card.classList.remove('drag-over', 'dragging');
+      });
+
+      draggedElement = null;
+      draggedId = null;
+    }
+
+    // 注册 Service Worker（PWA 离线支持）
+    async function registerServiceWorker() {
+      if ('serviceWorker' in navigator) {
+        try {
+          const registration = await navigator.serviceWorker.register('/serviceworker.js');
+          console.log('✅ Service Worker 注册成功:', registration.scope);
+
+          // 监听更新
+          registration.addEventListener('updatefound', () => {
+            const newWorker = registration.installing;
+            newWorker.addEventListener('statechange', () => {
+              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                console.log('🔄 发现新版本！刷新页面即可更新');
+                // 可选：显示更新提示给用户
+              }
+            });
+          });
+        } catch (error) {
+          console.error('❌ Service Worker 注册失败:', error);
+        }
+      }
+    }
+
+    // 初始化
+    function init() {
+      // 加载并应用主题
+      loadTheme();
+
+      // 渲染卡片
+      renderCards();
+
+      // 绑定主题切换按钮
+      document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
+
+      // 注册 Service Worker（PWA 支持）
+      registerServiceWorker();
+    }
+
+    // DOM 加载完成后初始化
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+  </script>
+</body>
+</html>
+

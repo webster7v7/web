@@ -1,0 +1,12 @@
+五个工作模式的转换指令如下：
+- 研究模式：ENTER RESEARCH MODE
+- 创新模式：ENTER INNOVATE MODE  
+- 规划模式：ENTER PLAN MODE
+- 执行模式：ENTER EXECUTE MODE
+- 审查模式：ENTER REVIEW MODE
+
+请注意：指令必须完全匹配，大小写敏感，不能有任何额外内容。
+
+
+ENTER REVIEW MODE
+我需要上传什么？上传后对已经上线的小程序，web，app有什么影响？

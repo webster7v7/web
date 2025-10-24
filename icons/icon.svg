@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- 临时 PWA 图标 - 建议替换为专业设计的图标 -->
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#2563eb;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- 背景 -->
+  <rect width="512" height="512" rx="80" fill="url(#grad)"/>
+  
+  <!-- 主文字 -->
+  <text x="256" y="320" 
+        font-size="280" 
+        font-weight="bold" 
+        text-anchor="middle" 
+        fill="white" 
+        font-family="Arial, sans-serif">导</text>
+  
+  <!-- 装饰元素 -->
+  <circle cx="128" cy="128" r="20" fill="white" opacity="0.3"/>
+  <circle cx="384" cy="384" r="24" fill="white" opacity="0.3"/>
+  <circle cx="384" cy="128" r="16" fill="white" opacity="0.2"/>
+</svg>
+

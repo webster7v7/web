@@ -1,0 +1,62 @@
+# 构建产物
+_site/
+dist/
+build/
+out/
+
+# 系统文件
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*.swo
+*~
+
+# 编辑器配置
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# 依赖目录
+node_modules/
+bower_components/
+vendor/
+
+# 日志文件
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# 临时文件
+*.tmp
+*.temp
+.cache/
+.parcel-cache/
+
+# 占位符文件（待替换的图标文件）
+*.placeholder
+
+# 环境配置
+.env
+.env.local
+.env.*.local
+
+# 操作系统
+*.pid
+*.seed
+*.pid.lock
+.lock-wscript
+
+# 测试覆盖率
+coverage/
+.nyc_output/
+
+# 可选的 npm 缓存目录
+.npm
+
+# 可选的 eslint 缓存
+.eslintcache
+

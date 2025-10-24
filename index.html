@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>个人导航站</title>
+  <title>webster的导航站</title>
   
   <!-- PWA Manifest -->
   <link rel="manifest" href="/manifest.json">
@@ -17,7 +17,7 @@
   <!-- iOS PWA 支持 -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="导航站">
+  <meta name="apple-mobile-web-app-title" content="webster导航">
   
   <!-- Windows Tile -->
   <meta name="msapplication-TileColor" content="#1a1a1a">
@@ -94,6 +94,15 @@
     }
 
     #theme-toggle:active {
+      transform: translateY(0);
+    }
+
+    #config-link:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px var(--shadow-hover);
+    }
+
+    #config-link:active {
       transform: translateY(0);
     }
 
@@ -220,11 +229,45 @@
 </head>
 <body>
   <header>
-    <h1>✨ 我的导航站</h1>
-    <button id="theme-toggle">🌙 切换主题</button>
+    <h1>✨ webster的导航站</h1>
+    <div style="display: flex; gap: 12px; align-items: center;">
+      <a href="config.html" id="config-link" style="background-color: var(--card-bg); color: var(--text-primary); text-decoration: none; padding: 10px 20px; border-radius: 8px; transition: all 0.3s; box-shadow: 0 2px 8px var(--shadow-color); display: inline-flex; align-items: center; gap: 8px;">
+        🛠️ 配置
+      </a>
+      <button id="theme-toggle">🌙 切换主题</button>
+    </div>
   </header>
 
   <main id="card-container"></main>
+
+  <footer style="max-width: 1200px; margin: 60px auto 0; text-align: center; padding: 40px 20px; color: var(--text-secondary); transition: color var(--transition-speed); position: relative;">
+    <!-- 顶部装饰线 -->
+    <div style="width: 100%; height: 1px; background: linear-gradient(90deg, transparent, var(--border-color), transparent); margin-bottom: 30px;"></div>
+    
+    <!-- 装饰点点 -->
+    <div style="display: flex; justify-content: center; gap: 8px; margin-bottom: 20px;">
+      <span style="width: 6px; height: 6px; border-radius: 50%; background: linear-gradient(135deg, #3b82f6, #8b5cf6); opacity: 0.6;"></span>
+      <span style="width: 6px; height: 6px; border-radius: 50%; background: linear-gradient(135deg, #3b82f6, #8b5cf6); opacity: 0.8;"></span>
+      <span style="width: 6px; height: 6px; border-radius: 50%; background: linear-gradient(135deg, #3b82f6, #8b5cf6);"></span>
+      <span style="width: 6px; height: 6px; border-radius: 50%; background: linear-gradient(135deg, #3b82f6, #8b5cf6); opacity: 0.8;"></span>
+      <span style="width: 6px; height: 6px; border-radius: 50%; background: linear-gradient(135deg, #3b82f6, #8b5cf6); opacity: 0.6;"></span>
+    </div>
+    
+    <!-- 开发者信息 -->
+    <div>
+      <span style="font-size: 0.875rem; display: block; margin-bottom: 12px; letter-spacing: 1px;">开发者 / Developer</span>
+      <span style="font-size: 2rem; font-weight: bold; background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; letter-spacing: 3px; display: inline-block;">WEBSTER</span>
+    </div>
+    
+    <!-- 底部装饰点点 -->
+    <div style="display: flex; justify-content: center; gap: 8px; margin-top: 20px;">
+      <span style="width: 6px; height: 6px; border-radius: 50%; background: linear-gradient(135deg, #3b82f6, #8b5cf6); opacity: 0.6;"></span>
+      <span style="width: 6px; height: 6px; border-radius: 50%; background: linear-gradient(135deg, #3b82f6, #8b5cf6); opacity: 0.8;"></span>
+      <span style="width: 6px; height: 6px; border-radius: 50%; background: linear-gradient(135deg, #3b82f6, #8b5cf6);"></span>
+      <span style="width: 6px; height: 6px; border-radius: 50%; background: linear-gradient(135deg, #3b82f6, #8b5cf6); opacity: 0.8;"></span>
+      <span style="width: 6px; height: 6px; border-radius: 50%; background: linear-gradient(135deg, #3b82f6, #8b5cf6); opacity: 0.6;"></span>
+    </div>
+  </footer>
 
   <script>
     // 可改参数：在此添加/删除/修改网址卡片
@@ -255,6 +298,13 @@
             "name": "搜索 - Microsoft 必应",
             "url": "https://www.bing.com",
             "icon": "https://www.bing.com/sa/simg/favicon-trans-bg-blue-mg-png.png",
+            "description": "暂无描述"
+      },
+      {
+            "id": "site_1761311806595_oydv67ihg",
+            "name": "用户登录",
+            "url": "https://i.chaoxing.com/base?t=1761261145049",
+            "icon": "https://i.chaoxing.com/favicon.ico",
             "description": "暂无描述"
       }
 ];

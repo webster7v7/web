@@ -1,10 +1,10 @@
-# 个人导航站 ✨
+# webster的导航站 ✨
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![PWA](https://img.shields.io/badge/PWA-enabled-brightgreen.svg)]()
 [![GitHub Pages](https://img.shields.io/badge/deploy-GitHub%20Pages-success.svg)]()
 
-一个"有生命力"的个人网站导航，纯原生技术实现，支持 PWA、主题切换、拖拽排序等现代化特性。
+webster的个人网站导航，纯原生技术实现，支持 PWA、主题切换、拖拽排序等现代化特性。
 
 ## ✨ 特性
 
@@ -368,7 +368,7 @@ git remote add origin https://github.com/你的用户名/仓库名.git
 
 **⭐ 如果这个项目对你有帮助，请给个 Star 支持一下！**
 
-Made with ❤️ by [Your Name]
+Made with ❤️ by **webster**
 
 [Report Bug](../../issues) · [Request Feature](../../issues)
 

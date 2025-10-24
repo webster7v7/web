@@ -1,7 +1,7 @@
 {
-  "name": "个人导航站",
-  "short_name": "导航站",
-  "description": "有生命力的个人网站导航",
+  "name": "webster的导航站",
+  "short_name": "webster导航",
+  "description": "webster的个人网站导航",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

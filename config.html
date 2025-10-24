@@ -788,34 +788,152 @@
       return content;
     }
 
-    // 可改参数：解析配置数组的正则表达式
+    // 可改参数：解析配置数组（使用括号匹配算法）
     function parseConfig(htmlContent) {
       try {
-        // 使用正则表达式提取 SITE_CONFIG 数组
-        const match = htmlContent.match(/const SITE_CONFIG = (\[[\s\S]*?\]);/);
+        console.log('🔍 开始解析配置，文件大小:', htmlContent.length, '字符');
+        
+        // 尝试多种方式查找 SITE_CONFIG
+        let match = null;
+        let configRegex = null;
+        
+        // 方法1: 标准格式（带可选空格）
+        configRegex = /const\s+SITE_CONFIG\s*=\s*\[/;
+        match = htmlContent.match(configRegex);
+        
         if (!match) {
-          throw new Error('未找到 SITE_CONFIG 配置');
+          // 方法2: 更宽松的匹配（允许任意空白字符）
+          console.log('⚠️ 方法1未找到，尝试方法2...');
+          configRegex = /SITE_CONFIG\s*=\s*\[/;
+          match = htmlContent.match(configRegex);
         }
-        // 解析 JSON 数组
-        const configString = match[1];
-        const config = eval(`(${configString})`); // 使用 eval 解析包含注释的 JS 数组
+        
+        if (!match) {
+          // 方法3: 直接查找关键字并显示文件信息
+          console.log('⚠️ 方法2未找到，尝试方法3...');
+          const searchText = 'SITE_CONFIG';
+          const index = htmlContent.indexOf(searchText);
+          
+          // 显示文件前100个字符帮助用户识别
+          console.log('📄 文件开头内容:\n', htmlContent.substring(0, 200));
+          
+          if (index !== -1) {
+            console.log('📍 找到 SITE_CONFIG 关键字在位置:', index);
+            const snippet = htmlContent.substring(Math.max(0, index - 50), index + 100);
+            console.log('📄 周围代码:\n', snippet);
+          } else {
+            console.log('❌ 文件中完全找不到 SITE_CONFIG 关键字！');
+            console.log('💡 这可能不是正确的 index.html 文件。');
+          }
+          
+          throw new Error('未找到 SITE_CONFIG 配置。请确认：\n1. 选择的是项目根目录下的 index.html\n2. 文件大小应该约 16KB（当前只有 ' + Math.round(htmlContent.length / 1024) + 'KB）\n3. 文件开头应该是 "<!DOCTYPE html>"');
+        }
+        
+        console.log('✅ 找到配置定义，位置:', match.index);
+        
+        // 获取匹配的起始位置
+        const startIndex = match.index;
+        const matchedText = match[0];
+        
+        // 从起始位置开始解析，使用括号匹配算法
+        const configStart = startIndex + matchedText.length;
+        let bracketCount = 1; // 已经匹配到第一个 [，所以从 1 开始
+        let endIndex = -1;
+        
+        // 逐字符扫描，匹配方括号
+        for (let i = configStart; i < htmlContent.length; i++) {
+          const char = htmlContent[i];
+          
+          if (char === '[') {
+            bracketCount++;
+          } else if (char === ']') {
+            bracketCount--;
+            
+            // 当括号计数归零时，找到了配置数组的结束位置
+            if (bracketCount === 0) {
+              endIndex = i + 1;
+              break;
+            }
+          }
+        }
+        
+        if (endIndex === -1) {
+          throw new Error('SITE_CONFIG 格式不完整，缺少闭合括号');
+        }
+        
+        console.log('✅ 找到配置结束位置:', endIndex);
+        
+        // 提取配置字符串（包括开始的 [ 和结束的 ]）
+        const configString = htmlContent.substring(configStart - 1, endIndex);
+        console.log('📦 配置字符串长度:', configString.length);
+        
+        // 解析配置（使用 eval，因为可能包含 JavaScript 表达式和注释）
+        const config = eval(`(${configString})`);
+        
+        // 验证配置类型
+        if (!Array.isArray(config)) {
+          throw new Error('SITE_CONFIG 必须是数组格式');
+        }
+        
+        console.log('✅ 成功解析配置，找到', config.length, '个卡片');
         return config;
       } catch (e) {
-        console.error('解析配置失败:', e);
-        throw new Error('解析配置失败，请检查 index.html 文件格式');
+        console.error('❌ 解析配置失败:', e);
+        throw new Error('解析配置失败，请检查 index.html 文件格式：' + e.message);
       }
     }
 
     // 更新配置到 HTML 内容
     function updateConfig(htmlContent, newConfigArray) {
-      // 将配置数组转换为格式化的 JSON 字符串
-      const configString = JSON.stringify(newConfigArray, null, 6);
-      // 替换原有的 SITE_CONFIG 数组
-      const newContent = htmlContent.replace(
-        /const SITE_CONFIG = \[[\s\S]*?\];/,
-        `const SITE_CONFIG = ${configString};`
-      );
-      return newContent;
+      try {
+        // 使用正则表达式查找 SITE_CONFIG（允许前面有空格缩进）
+        const configRegex = /const\s+SITE_CONFIG\s*=\s*\[/;
+        const match = htmlContent.match(configRegex);
+        
+        if (!match) {
+          throw new Error('未找到 SITE_CONFIG 配置');
+        }
+        
+        // 获取匹配的起始位置
+        const startIndex = match.index;
+        const matchedText = match[0];
+        
+        // 使用括号匹配算法找到结束位置
+        const configStart = startIndex + matchedText.length;
+        let bracketCount = 1; // 已经匹配到第一个 [
+        let endIndex = -1;
+        
+        for (let i = configStart; i < htmlContent.length; i++) {
+          const char = htmlContent[i];
+          if (char === '[') {
+            bracketCount++;
+          } else if (char === ']') {
+            bracketCount--;
+            if (bracketCount === 0) {
+              endIndex = i + 1;
+              break;
+            }
+          }
+        }
+        
+        if (endIndex === -1) {
+          throw new Error('SITE_CONFIG 格式不完整');
+        }
+        
+        // 格式化新配置（使用 6 空格缩进以匹配原文件格式）
+        const configString = JSON.stringify(newConfigArray, null, 6);
+        
+        // 构建新内容：前部分 + 新配置 + 后部分
+        // 注意：configStart - 1 是因为要包含 [
+        const before = htmlContent.substring(0, configStart - 1);
+        const after = htmlContent.substring(endIndex);
+        
+        console.log('✅ 配置更新成功');
+        return before + configString + after;
+      } catch (e) {
+        console.error('更新配置失败:', e);
+        throw new Error('更新配置失败：' + e.message);
+      }
     }
 
     // 写入文件内容

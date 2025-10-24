@@ -7,13 +7,13 @@ const CACHE_NAME = `nav-pwa-${CACHE_VERSION}`;
 
 // 可改参数：需要预缓存的静态资源列表
 const STATIC_ASSETS = [
-  '/',
-  '/index.html',
-  '/config.html',
-  '/manifest.json',
-  '/icons/icon-192.png',
-  '/icons/icon-512.png',
-  '/icons/icon.svg'
+  '/web/',
+  '/web/index.html',
+  '/web/config.html',
+  '/web/manifest.json',
+  '/web/icons/icon-192.png',
+  '/web/icons/icon-512.png',
+  '/web/icons/icon.svg'
 ];
 
 // Install 事件：安装 Service Worker 时触发
@@ -128,7 +128,7 @@ self.addEventListener('fetch', (event) => {
                 return cachedResponse;
               }
               // 如果缓存也没有，返回离线页面
-              return caches.match('/index.html');
+              return caches.match('/web/index.html');
             });
         })
     );

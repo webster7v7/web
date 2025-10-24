@@ -6,13 +6,13 @@
   <title>webster的导航站</title>
   
   <!-- PWA Manifest -->
-  <link rel="manifest" href="/manifest.json">
+  <link rel="manifest" href="/web/manifest.json">
   
   <!-- 主题色（会被 JS 动态更新以跟随暗色/亮色模式） -->
   <meta name="theme-color" content="#1a1a1a" id="theme-color-meta">
   
   <!-- Apple Touch Icon -->
-  <link rel="apple-touch-icon" href="/icons/icon-192.png">
+  <link rel="apple-touch-icon" href="/web/icons/icon-192.png">
   
   <!-- iOS PWA 支持 -->
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -21,7 +21,7 @@
   
   <!-- Windows Tile -->
   <meta name="msapplication-TileColor" content="#1a1a1a">
-  <meta name="msapplication-TileImage" content="/icons/icon-192.png">
+  <meta name="msapplication-TileImage" content="/web/icons/icon-192.png">
   
   <style>
     /* 可改参数：主题颜色配置 */
@@ -523,11 +523,11 @@
       draggedId = null;
     }
 
-    // 注册 Service Worker（PWA 离线支持）
+      // 注册 Service Worker（PWA 离线支持）
     async function registerServiceWorker() {
       if ('serviceWorker' in navigator) {
         try {
-          const registration = await navigator.serviceWorker.register('/serviceworker.js');
+          const registration = await navigator.serviceWorker.register('/web/serviceworker.js');
           console.log('✅ Service Worker 注册成功:', registration.scope);
 
           // 监听更新
